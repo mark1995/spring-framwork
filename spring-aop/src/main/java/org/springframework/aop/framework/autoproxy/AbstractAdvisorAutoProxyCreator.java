@@ -93,10 +93,21 @@ public abstract class AbstractAdvisorAutoProxyCreator extends AbstractAutoProxyC
 	 * @see #extendAdvisors
 	 */
 	protected List<Advisor> findEligibleAdvisors(Class<?> beanClass, String beanName) {
+		//找到候选（所有） candidateAdvisors排序好了(anno)
+		//如果是xml（排好序的---不是我们最终那个期待的结果，xml当中的声明顺序）
+		//所谓的期待并不是那个正确结果（不是和anno）（和xml现象一样应该是after在前 afterreturing在后）
+		/**
+		 * 	<aop:after-returning method="afterReturning" pointcut-ref="myPointcut" />
+		 * 	<aop:after method="after" pointcut-ref="myPointcut" />
+		 */
+		//注解版会进行类型排序 xml不会之后进行声明排序
 		List<Advisor> candidateAdvisors = findCandidateAdvisors();
+		//找到符合
 		List<Advisor> eligibleAdvisors = findAdvisorsThatCanApply(candidateAdvisors, beanClass, beanName);
 		extendAdvisors(eligibleAdvisors);
 		if (!eligibleAdvisors.isEmpty()) {
+			//表面上排序 实际上面已经；排序成功（anno）candidateAdvisors
+			//针对xml的排序---声明顺序 （Orderd）
 			eligibleAdvisors = sortAdvisors(eligibleAdvisors);
 		}
 		return eligibleAdvisors;

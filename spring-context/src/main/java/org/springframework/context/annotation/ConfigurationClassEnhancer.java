@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.util.Arrays;
+import java.util.Properties;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -34,10 +35,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.SimpleInstantiationStrategy;
-import org.springframework.cglib.core.ClassGenerator;
-import org.springframework.cglib.core.ClassLoaderAwareGeneratorStrategy;
-import org.springframework.cglib.core.Constants;
-import org.springframework.cglib.core.SpringNamingPolicy;
+import org.springframework.cglib.core.*;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.CallbackFilter;
 import org.springframework.cglib.proxy.Enhancer;
@@ -70,17 +68,18 @@ import org.springframework.util.ReflectionUtils;
  * @see #enhance
  * @see ConfigurationClassPostProcessor
  */
-class ConfigurationClassEnhancer {
+public class ConfigurationClassEnhancer {
 
 	// The callbacks to use. Note that these callbacks must be stateless.
 	private static final Callback[] CALLBACKS = new Callback[] {
 			new BeanMethodInterceptor(),
+			//如果Appconfig的代理对象当中有setBeanFactory
 			new BeanFactoryAwareMethodInterceptor(),
 			NoOp.INSTANCE
 	};
 
 	private static final ConditionalCallbackFilter CALLBACK_FILTER = new ConditionalCallbackFilter(CALLBACKS);
-
+	//cglib生成类的时候动态添加的一个属性
 	private static final String BEAN_FACTORY_FIELD = "$$beanFactory";
 
 
@@ -118,15 +117,35 @@ class ConfigurationClassEnhancer {
 	 * Creates a new CGLIB {@link Enhancer} instance.
 	 */
 	private Enhancer newEnhancer(Class<?> configSuperClass, @Nullable ClassLoader classLoader) {
+		try {
+			saveGeneratedCGlibProxyFiles("d:\\");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		//
 		Enhancer enhancer = new Enhancer();
+		//=Appconfig
 		enhancer.setSuperclass(configSuperClass);
+		//判断是否被代理了？
 		enhancer.setInterfaces(new Class<?>[] {EnhancedConfiguration.class});
+		//
 		enhancer.setUseFactory(false);
+		//
 		enhancer.setNamingPolicy(SpringNamingPolicy.INSTANCE);
+		//
 		enhancer.setStrategy(new BeanFactoryAwareGeneratorStrategy(classLoader));
+
 		enhancer.setCallbackFilter(CALLBACK_FILTER);
 		enhancer.setCallbackTypes(CALLBACK_FILTER.getCallbackTypes());
 		return enhancer;
+	}
+
+	public static void saveGeneratedCGlibProxyFiles(String dir) throws Exception {
+		Field field = System.class.getDeclaredField("props");
+		field.setAccessible(true);
+		Properties props = (Properties) field.get(null);
+		System.setProperty(DebuggingClassWriter.DEBUG_LOCATION_PROPERTY, dir);//dir为保存文件路径
+		props.put("net.sf.cglib.core.DebuggingClassWriter.traceEnabled", "true");
 	}
 
 	/**
@@ -171,7 +190,7 @@ class ConfigurationClassEnhancer {
 	 * A {@link CallbackFilter} that works by interrogating {@link Callback Callbacks} in the order
 	 * that they are defined via {@link ConditionalCallback}.
 	 */
-	private static class ConditionalCallbackFilter implements CallbackFilter {
+	public static class ConditionalCallbackFilter implements CallbackFilter {
 
 		private final Callback[] callbacks;
 
@@ -189,6 +208,7 @@ class ConfigurationClassEnhancer {
 		public int accept(Method method) {
 			for (int i = 0; i < this.callbacks.length; i++) {
 				Callback callback = this.callbacks[i];
+				//过滤的
 				if (!(callback instanceof ConditionalCallback) || ((ConditionalCallback) callback).isMatch(method)) {
 					return i;
 				}
@@ -207,7 +227,7 @@ class ConfigurationClassEnhancer {
 	 * Also exposes the application ClassLoader as thread context ClassLoader for the time of
 	 * class generation (in order for ASM to pick it up when doing common superclass resolution).
 	 */
-	private static class BeanFactoryAwareGeneratorStrategy extends
+	public static class BeanFactoryAwareGeneratorStrategy extends
 			ClassLoaderAwareGeneratorStrategy {
 
 		public BeanFactoryAwareGeneratorStrategy(@Nullable ClassLoader classLoader) {
@@ -234,7 +254,7 @@ class ConfigurationClassEnhancer {
 	 * {@code @Configuration} class instances for the purpose of recording the {@link BeanFactory}.
 	 * @see EnhancedConfiguration
 	 */
-	private static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor, ConditionalCallback {
+	public static class BeanFactoryAwareMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		@Override
 		@Nullable
@@ -271,7 +291,7 @@ class ConfigurationClassEnhancer {
 	 * @see Bean
 	 * @see ConfigurationClassEnhancer
 	 */
-	private static class BeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
+	public static class BeanMethodInterceptor implements MethodInterceptor, ConditionalCallback {
 
 		/**
 		 * Enhance a {@link Bean @Bean} method to check the supplied BeanFactory for the

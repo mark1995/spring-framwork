@@ -37,6 +37,7 @@ public class AssignableTypeFilter extends AbstractTypeHierarchyTraversingFilter 
 	 * @param targetType the type to match
 	 */
 	public AssignableTypeFilter(Class<?> targetType) {
+		//考虑接口和Inherited
 		super(true, true);
 		this.targetType = targetType;
 	}

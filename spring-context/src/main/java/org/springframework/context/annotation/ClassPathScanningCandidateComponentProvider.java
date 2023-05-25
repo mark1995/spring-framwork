@@ -415,6 +415,8 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
+
+		//公共包名获取包所在的路径得到一个文件对象  流
 		try {
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
@@ -426,10 +428,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 					logger.trace("Scanning " + resource);
 				}
 				try {
+					//class ==metadataReader
 					MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
+					//判断是否被排除，是否加了必要的注解
+					//E 没有被排除 E被第四个include 过滤到了
 					if (isCandidateComponent(metadataReader)) {
 						ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 						sbd.setSource(resource);
+						//是否抽象，是否接口
 						if (isCandidateComponent(sbd)) {
 							if (debugEnabled) {
 								logger.debug("Identified candidate component class: " + resource);
@@ -485,13 +491,22 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 * @return whether the class qualifies as a candidate component
 	 */
 	protected boolean isCandidateComponent(MetadataReader metadataReader) throws IOException {
+		//当他扫描到一个类的时候首先判断这个类有没有被排除
 		for (TypeFilter tf : this.excludeFilters) {
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
 				return false;
 			}
 		}
 		for (TypeFilter tf : this.includeFilters) {
+			//1-tf =new AnnotationTypeFilter(Component.class)
+			//1-tf.match#matchSelf会执行子类的matchSelf方法 是否加了@Component.class
+
+			//2-tf= new AnnotationTypeFilter(Component.class)
+			//2-tf.match#matchSelf会执行子类的matchSelf方法 是否加了ManagedBean
+			//4-tf.match#matchSelf会执行父类的返回false 继续执行 matchClassName
 			if (tf.match(metadataReader, getMetadataReaderFactory())) {
+
+				//恒定返回true
 				return isConditionMatch(metadataReader);
 			}
 		}

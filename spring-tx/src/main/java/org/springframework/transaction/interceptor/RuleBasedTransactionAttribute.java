@@ -150,7 +150,7 @@ public class RuleBasedTransactionAttribute extends DefaultTransactionAttribute i
 		if (logger.isTraceEnabled()) {
 			logger.trace("Winning rollback rule is: " + winner);
 		}
-
+		//判断 RuntimeException || ex instanceof Error
 		// User superclass behavior (rollback on unchecked) if no rule matches.
 		if (winner == null) {
 			logger.trace("No relevant rollback rule found: applying default rules");

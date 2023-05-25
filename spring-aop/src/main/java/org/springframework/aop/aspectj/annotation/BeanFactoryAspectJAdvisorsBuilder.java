@@ -79,18 +79,27 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 	 * <p>Creates a Spring Advisor for each AspectJ advice method.
 	 * @return the list of {@link org.springframework.aop.Advisor} beans
 	 * @see #isEligibleBean
+	 *
+	 * 所有的bean实例化都会调用他
 	 */
 	public List<Advisor> buildAspectJAdvisors() {
+		//List=aspectBeanNames当前项目当中所有的切面[aopAspect]
+		//这个切面spring怎么找到?
 		List<String> aspectNames = this.aspectBeanNames;
-
+		//如果等于null
+		//something---
 		if (aspectNames == null) {
 			synchronized (this) {
 				aspectNames = this.aspectBeanNames;
 				if (aspectNames == null) {
 					List<Advisor> advisors = new ArrayList<>();
+					//实例化list
 					aspectNames = new ArrayList<>();
+
+					//获取当前容器当中所有bean的名字
 					String[] beanNames = BeanFactoryUtils.beanNamesForTypeIncludingAncestors(
 							this.beanFactory, Object.class, true, false);
+					//对名字进行遍历
 					for (String beanName : beanNames) {
 						if (!isEligibleBean(beanName)) {
 							continue;
@@ -101,13 +110,17 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 						if (beanType == null) {
 							continue;
 						}
+						//判断是不是切面
 						if (this.advisorFactory.isAspect(beanType)) {
+							//放到list当中
 							aspectNames.add(beanName);
 							AspectMetadata amd = new AspectMetadata(beanType, beanName);
 							if (amd.getAjType().getPerClause().getKind() == PerClauseKind.SINGLETON) {
 								MetadataAwareAspectInstanceFactory factory =
 										new BeanFactoryAspectInstanceFactory(this.beanFactory, beanName);
+								//找出当前切面当中所有的通知(已经完成了排序 anno)
 								List<Advisor> classAdvisors = this.advisorFactory.getAdvisors(factory);
+
 								if (this.beanFactory.isSingleton(beanName)) {
 									this.advisorsCache.put(beanName, classAdvisors);
 								}
@@ -139,6 +152,8 @@ public class BeanFactoryAspectJAdvisorsBuilder {
 			return Collections.emptyList();
 		}
 		List<Advisor> advisors = new ArrayList<>();
+
+		//从一个缓存当中获取 在上面那个if (aspectNames == null)当中
 		for (String aspectName : aspectNames) {
 			List<Advisor> cachedAdvisors = this.advisorsCache.get(aspectName);
 			if (cachedAdvisors != null) {

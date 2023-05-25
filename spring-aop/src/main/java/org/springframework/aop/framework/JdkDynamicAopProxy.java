@@ -191,6 +191,12 @@ final class JdkDynamicAopProxy implements AopProxy, InvocationHandler, Serializa
 			// in case it comes from a pool.
 			target = targetSource.getTarget();
 			Class<?> targetClass = (target != null ? target.getClass() : null);
+			//找到符合当前bean的一些通知
+			//advised == ProxyFactory 对象当中已经缓存了对应的通知
+			//什么时候缓存进去（已经排好序）
+			//ProxyFactory.addAdvice 什么时候调用
+			//ProxyFactory什么时候实例化?
+			//什么时候完成AOP
 
 			// Get the interception chain for this method.
 			List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);

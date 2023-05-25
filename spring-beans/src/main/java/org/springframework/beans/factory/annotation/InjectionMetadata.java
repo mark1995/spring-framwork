@@ -116,6 +116,8 @@ public class InjectionMetadata {
 				(checkedElements != null ? checkedElements : this.injectedElements);
 		if (!elementsToIterate.isEmpty()) {
 			for (InjectedElement element : elementsToIterate) {
+				//处理Resoruce --InjectedElement 子类--ResourceElement
+				//处理的是Autowired -- InjectedElement --子类 AutowiredInjectedElement
 				element.inject(target, beanName, pvs);
 			}
 		}
@@ -218,6 +220,8 @@ public class InjectionMetadata {
 
 		/**
 		 * Either this or {@link #getResourceToInject} needs to be overridden.
+		 *
+		 * 注入@Resource
 		 */
 		protected void inject(Object target, @Nullable String requestingBeanName, @Nullable PropertyValues pvs)
 				throws Throwable {
@@ -225,6 +229,7 @@ public class InjectionMetadata {
 			if (this.isField) {
 				Field field = (Field) this.member;
 				ReflectionUtils.makeAccessible(field);
+				// getResourceToInject(target, requestingBeanName)  找到需要注入的对象
 				field.set(target, getResourceToInject(target, requestingBeanName));
 			}
 			else {
