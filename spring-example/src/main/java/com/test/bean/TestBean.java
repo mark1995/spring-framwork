@@ -12,10 +12,9 @@ public class TestBean {
 
 	public static void main(String[] args) {
 		AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
-		applicationContext.register(AA.class
-		);
+		applicationContext.register(BeanConfig.class);
 		applicationContext.refresh();
-		Object aa = applicationContext.getBean("aa");
+		Object aa = applicationContext.getBean("testAA");
 		System.out.println(aa);
 	}
 }
