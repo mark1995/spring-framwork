@@ -1,6 +1,7 @@
 package com.test.batis.service.impl;
 
 import com.test.batis.dao.SMapper;
+import com.test.batis.dao.UserMapper;
 import com.test.batis.service.SService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-
 public class SServiceImpl implements SService {
 
 	// 1. 代理对象
@@ -20,8 +20,14 @@ public class SServiceImpl implements SService {
 	@Autowired
 	private SMapper sMapper;
 
+	@Autowired(required = false)
+	private UserMapper userMapper;
+
 	@Override
 	public List<Map<String, Object>> queryForList() {
+		if (userMapper != null) {
+			userMapper.queryForList();
+		}
 		return sMapper.queryForList();
 	}
 }

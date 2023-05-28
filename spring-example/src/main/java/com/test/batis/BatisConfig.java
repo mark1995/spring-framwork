@@ -7,6 +7,7 @@ import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 
@@ -14,8 +15,9 @@ import javax.sql.DataSource;
 
 
 @ComponentScan("com.test.batis")
-//@MapperScan("com.test.batis.dao")
+@MapperScan("com.test.batis.dao")
 //@ImportResource("classpath:spring-batis.xml")
+@MyScan
 public class BatisConfig {
 
 

@@ -36,7 +36,7 @@ public class MySqlSession {
 			Select select = method.getAnnotation(Select.class);
 			String sql = select.value()[0];
 			log.debug("test connection db");
-			log.debug("test executor sql");
+			log.debug("test executor sql {}", sql);
 			log.debug("test return sql result");
 			return null;
 		}

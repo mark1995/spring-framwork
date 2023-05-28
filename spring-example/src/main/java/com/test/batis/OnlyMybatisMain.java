@@ -19,7 +19,7 @@ public class OnlyMybatisMain {
 
 	public static void main(String[] args) {
 //
-	}		BatisConfig batisConfig = new BatisConfig();
+//		BatisConfig batisConfig = new BatisConfig();
 //		DataSource dataSource = batisConfig.dataSource();
 //		TransactionFactory  transactionFactory = new JdbcTransactionFactory();
 //		Environment environment = new Environment("development", transactionFactory, dataSource);
@@ -33,4 +33,5 @@ public class OnlyMybatisMain {
 //		SMapper mapper = sqlSession.getMapper(SMapper.class);
 //		List<Map<String, Object>> resultMap = mapper.queryForList();
 //		log.debug("resultMap:{}", resultMap);
+	}
 }

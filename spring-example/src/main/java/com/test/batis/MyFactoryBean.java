@@ -10,6 +10,7 @@ import org.springframework.beans.factory.FactoryBean;
  * 	a xml
  * 	b 注解
  * 	c beanDefinition交给spring 如何动态注册beanDefinition, 什么是beanDefinition
+ * 	  ImportBeanDefinitionRegistrar  注册beanDefinition BeanDefinitionBuilder
  */
 //@Component
 public class MyFactoryBean implements FactoryBean {
