@@ -58,6 +58,11 @@ public class AnnotationAwareOrderComparator extends OrderComparator {
 	 * elements, in addition to the {@link org.springframework.core.Ordered}
 	 * check in the superclass.
 	 */
+	/**
+	 * order注解解析取值
+	 * @param obj the object to check
+	 * @return
+	 */
 	@Override
 	@Nullable
 	protected Integer findOrder(Object obj) {

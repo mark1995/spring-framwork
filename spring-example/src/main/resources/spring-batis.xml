@@ -5,5 +5,10 @@
        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
+	<!-- xml 注入factoryBean	-->
+	<!-- 一个一个注入，比较麻烦，给一个包名去指定扫描注入	-->
+	<bean id="t" class="com.test.batis.MyFactoryBean">
+		<property name="mapperInterface" value="com.test.batis.dao.SMapper"></property>
+	</bean>
 
 </beans>
