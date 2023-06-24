@@ -16,18 +16,8 @@
 
 package org.springframework.beans.factory.xml;
 
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.config.BeanDefinitionHolder;
 import org.springframework.beans.factory.parsing.BeanComponentDefinition;
@@ -38,6 +28,15 @@ import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
 import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Default implementation of the {@link BeanDefinitionDocumentReader} interface that
@@ -206,7 +205,8 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 * Parse an "import" element and load the bean definitions
 	 * from the given resource into the bean factory.
 	 */
-	protected void importBeanDefinitionResource(Element ele) {
+	protected void
+	importBeanDefinitionResource(Element ele) {
 		String location = ele.getAttribute(RESOURCE_ATTRIBUTE);
 		if (!StringUtils.hasText(location)) {
 			getReaderContext().error("Resource location must not be empty", ele);
@@ -305,6 +305,7 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
+			// 如果有必要的话，装饰下beanDefinition
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
 				// Register the final decorated instance.
@@ -315,6 +316,9 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 						bdHolder.getBeanName() + "'", ele, ex);
 			}
 			// Send registration event.
+			/**
+			 * 通知监听器解析及注册完成
+			 */
 			getReaderContext().fireComponentRegistered(new BeanComponentDefinition(bdHolder));
 		}
 	}

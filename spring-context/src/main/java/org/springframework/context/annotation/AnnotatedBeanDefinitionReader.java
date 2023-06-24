@@ -16,9 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.lang.annotation.Annotation;
-import java.util.function.Supplier;
-
 import org.springframework.beans.factory.annotation.AnnotatedGenericBeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanDefinitionCustomizer;
@@ -32,6 +29,9 @@ import org.springframework.core.env.EnvironmentCapable;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.lang.Nullable;
 import org.springframework.util.Assert;
+
+import java.lang.annotation.Annotation;
+import java.util.function.Supplier;
 
 /**
  * Convenient adapter for programmatic registration of bean classes.
@@ -88,6 +88,9 @@ public class AnnotatedBeanDefinitionReader {
 		this.registry = registry;
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
 		//注册spring内置的beanDefinition
+		/**
+		 * 生成spring 开天辟地的 bean
+		 */
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 

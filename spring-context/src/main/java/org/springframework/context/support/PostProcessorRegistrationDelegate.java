@@ -16,29 +16,19 @@
 
 package org.springframework.context.support;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.beans.factory.support.MergedBeanDefinitionPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
+import org.springframework.beans.factory.support.*;
 import org.springframework.core.OrderComparator;
 import org.springframework.core.Ordered;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.lang.Nullable;
+
+import java.util.*;
 
 /**
  * Delegate for AbstractApplicationContext's post-processor handling.
@@ -57,15 +47,22 @@ final class PostProcessorRegistrationDelegate {
 	 * 问题
 	 * 1、顺序能不能变？  最好不要变？意图？
 	 * 2、BeanDefinitionRegistryPostProcessor 和 ImportBeanDefinitionRegistrar的区别
+	 * 		动态注册BeanFactory
+	 * 	都是动态注入BeanDefinition
+	 * 	    API 提供的， 内置的 会快于 ImportBeanDefinitionRegistrar
 	 * 3、priorityOrderedPostProcessors为什么先是实例化 写法不一样
 	 * 4、processedBeans当中为什么不存api传过来的   api提供的子类或者父类 都不可能重复执行
 	 * 5、BeanDefinitionRegistryPostProcessor对于bd的修改，如何保证正确 提高当前bdrpp的执行时机
-	 * 6、BeanFactoryPostProcessor当中为什么不开放注册bd(其实是开放的) 有什么问题？-产生不合格的bean
+	 * 6、BeanFactoryPostProcessor当中为什么不开放注册bd
+	 *
+	 * (其实是开放的) 有什么问题？-产生不合格的bean
 	 * @param beanFactory
 	 * @param beanFactoryPostProcessors
 	 */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
+		// beanFactory = DefaultListenableBeanFactory
+
 
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
 		//不是API提供的 为什么不需要存 不会重复执行？

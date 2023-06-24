@@ -16,6 +16,15 @@
 
 package org.springframework.beans.factory.support;
 
+import org.apache.commons.logging.Log;
+import org.springframework.beans.*;
+import org.springframework.beans.factory.*;
+import org.springframework.beans.factory.config.*;
+import org.springframework.core.*;
+import org.springframework.lang.Nullable;
+import org.springframework.util.*;
+import org.springframework.util.ReflectionUtils.MethodCallback;
+
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -25,53 +34,10 @@ import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Supplier;
-
-import org.apache.commons.logging.Log;
-
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.BeanWrapper;
-import org.springframework.beans.BeanWrapperImpl;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.MutablePropertyValues;
-import org.springframework.beans.PropertyAccessorUtils;
-import org.springframework.beans.PropertyValue;
-import org.springframework.beans.PropertyValues;
-import org.springframework.beans.TypeConverter;
-import org.springframework.beans.factory.*;
-import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
-import org.springframework.beans.factory.config.AutowiredPropertyMarker;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.beans.factory.config.ConstructorArgumentValues;
-import org.springframework.beans.factory.config.DependencyDescriptor;
-import org.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
-import org.springframework.beans.factory.config.SmartInstantiationAwareBeanPostProcessor;
-import org.springframework.beans.factory.config.TypedStringValue;
-import org.springframework.core.DefaultParameterNameDiscoverer;
-import org.springframework.core.MethodParameter;
-import org.springframework.core.NamedThreadLocal;
-import org.springframework.core.ParameterNameDiscoverer;
-import org.springframework.core.PriorityOrdered;
-import org.springframework.core.ResolvableType;
-import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
-import org.springframework.util.ClassUtils;
-import org.springframework.util.ObjectUtils;
-import org.springframework.util.ReflectionUtils;
-import org.springframework.util.ReflectionUtils.MethodCallback;
-import org.springframework.util.StringUtils;
 
 /**
  * Abstract bean factory superclass that implements default bean creation,
@@ -409,6 +375,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		return result;
 	}
 
+	/**
+	 * bean的后置处理器，调用过程
+	 * @param existingBean the existing bean instance
+	 * @param beanName the name of the bean, to be passed to it if necessary
+	 * (only passed to {@link BeanPostProcessor BeanPostProcessors};
+	 * can follow the {@link #ORIGINAL_INSTANCE_SUFFIX} convention in order to
+	 * enforce the given instance to be returned, i.e. no proxies etc)
+	 * @return
+	 * @throws BeansException
+	 */
 	@Override
 	public Object applyBeanPostProcessorsAfterInitialization(Object existingBean, String beanName)
 			throws BeansException {
@@ -470,6 +446,9 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		}
 		RootBeanDefinition mbdToUse = mbd;
 
+		/**
+		 * 锁定class，根据设置的class属性 或者 根据 className来解析 Class
+		 */
 		// Make sure bean class is actually resolved at this point, and
 		// clone the bean definition in case of a dynamically resolved Class
 		// which cannot be stored in the shared merged bean definition.
@@ -481,6 +460,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		// Prepare method overrides.
 		try {
+			// 验证 准备 覆盖的方法
 			mbdToUse.prepareMethodOverrides();
 		}
 		catch (BeanDefinitionValidationException ex) {
@@ -491,6 +471,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		try {
 			//不需要关心 aop相关
 			//找出所有的通知
+			// 代理bean 出来了
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {

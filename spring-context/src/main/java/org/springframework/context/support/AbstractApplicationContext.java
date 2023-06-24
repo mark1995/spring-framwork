@@ -16,21 +16,8 @@
 
 package org.springframework.context.support;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.CachedIntrospectionResults;
 import org.springframework.beans.factory.BeanFactory;
@@ -40,29 +27,8 @@ import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.support.ResourceEditorRegistrar;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.ApplicationEvent;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.EmbeddedValueResolverAware;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.HierarchicalMessageSource;
-import org.springframework.context.LifecycleProcessor;
-import org.springframework.context.MessageSource;
-import org.springframework.context.MessageSourceAware;
-import org.springframework.context.MessageSourceResolvable;
-import org.springframework.context.NoSuchMessageException;
-import org.springframework.context.PayloadApplicationEvent;
-import org.springframework.context.ResourceLoaderAware;
-import org.springframework.context.event.ApplicationEventMulticaster;
-import org.springframework.context.event.ContextClosedEvent;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.ContextStoppedEvent;
-import org.springframework.context.event.SimpleApplicationEventMulticaster;
+import org.springframework.context.*;
+import org.springframework.context.event.*;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 import org.springframework.context.weaving.LoadTimeWeaverAware;
 import org.springframework.context.weaving.LoadTimeWeaverAwareProcessor;
@@ -82,6 +48,11 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.ReflectionUtils;
+
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Abstract implementation of the {@link org.springframework.context.ApplicationContext}
@@ -178,6 +149,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private ConfigurableEnvironment environment;
 
 	/** BeanFactoryPostProcessors to apply on refresh. */
+	/**
+	 * 记录一种bean的来源
+	 * 有了注解 为啥还要
+	 */
 	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
 	/** System time in milliseconds when this context started. */
@@ -531,9 +506,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 				// Invoke factory processors registered as beans in the context.
 				/**
-				 * 所有不等于真实的所有
-				 * 所有：可靠？
+				 * 所有不等于真正意义上的所有
+				 * 所有：可靠？（beanFactoryPostProcessor是否可靠，）
+				 * 	1. Component
+				 * 	2. 调用addBeanFactoryPostProcessor
 				 * 1、完成了扫描
+				 *
+				 *
+				 * 核心代码 很重要
 				 */
 				invokeBeanFactoryPostProcessors(beanFactory);
 
@@ -546,6 +526,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 				// Initialize event multicaster for this context.
 				initApplicationEventMulticaster();
 
+				//
 				// Initialize other special beans in specific context subclasses.
 				onRefresh();
 
@@ -589,6 +570,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void prepareRefresh() {
 		// Switch to active.
+		/**
+		 * 当前系统启动时间
+		 */
 		this.startupDate = System.currentTimeMillis();
 		this.closed.set(false);
 		this.active.set(true);
@@ -603,6 +587,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		/**
+		 * 容器属性初始化， 扩展点
+		 */
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
@@ -636,6 +623,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 
 		//我写的 必须一个属性=ry
+		/**
+		 * 如果写了这个代码，就让spring容器启动的时候 需要必要的xxx属性
+		 */
 		//getEnvironment().setRequiredProperties("xxx");
 	}
 

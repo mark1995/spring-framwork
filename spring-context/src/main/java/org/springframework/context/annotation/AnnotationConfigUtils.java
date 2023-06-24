@@ -16,11 +16,6 @@
 
 package org.springframework.context.annotation;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.springframework.beans.factory.annotation.AnnotatedBeanDefinition;
 import org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -37,6 +32,11 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.lang.Nullable;
 import org.springframework.util.ClassUtils;
+
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Utility class that allows for convenient registration of common
@@ -158,6 +158,17 @@ public abstract class AnnotationConfigUtils {
 			}
 		}
 
+		/**
+		 * configuration 注解 处理器
+		 * autowired 注解 处理器
+		 * 名字 和 类 不一样
+		 * internalConfigurationAnnotationProcessor =》  ConfigurationClassPostProcessor
+		 * internalAutowiredAnnotationProcessor =》  AutowiredAnnotationBeanPostProcessor
+		 * internalCommonAnnotationProcessor =》 CommonAnnotationBeanPostProcessor
+		 * internalPersistenceAnnotationProcessor =》 PersistenceAnnotationBeanPostProcessor
+		 * internalEventListenerProcessor =》 EventListenerMethodProcessor
+		 * internalEventListenerFactory =》 DefaultEventListenerFactory
+		 */
 		Set<BeanDefinitionHolder> beanDefs = new LinkedHashSet<>(8);
 
 		if (!registry.containsBeanDefinition(CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME)) {
@@ -166,6 +177,8 @@ public abstract class AnnotationConfigUtils {
 			beanDefs.add(registerPostProcessor(registry, def, CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME));
 		}
 
+
+		// 解析@Autowired
 		if (!registry.containsBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(AutowiredAnnotationBeanPostProcessor.class);
 			def.setSource(source);
@@ -173,6 +186,7 @@ public abstract class AnnotationConfigUtils {
 		}
 
 		// Check for JSR-250 support, and if present add the CommonAnnotationBeanPostProcessor.
+		// 解析@Resource
 		if (jsr250Present && !registry.containsBeanDefinition(COMMON_ANNOTATION_PROCESSOR_BEAN_NAME)) {
 			RootBeanDefinition def = new RootBeanDefinition(CommonAnnotationBeanPostProcessor.class);
 			def.setSource(source);

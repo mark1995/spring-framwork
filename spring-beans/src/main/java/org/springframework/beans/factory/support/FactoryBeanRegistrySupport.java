@@ -16,20 +16,16 @@
 
 package org.springframework.beans.factory.support;
 
-import java.security.AccessControlContext;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.security.PrivilegedActionException;
-import java.security.PrivilegedExceptionAction;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanCreationException;
 import org.springframework.beans.factory.BeanCurrentlyInCreationException;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.FactoryBeanNotInitializedException;
 import org.springframework.lang.Nullable;
+
+import java.security.*;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Support base class for singleton registries which need to handle
@@ -146,6 +142,7 @@ public abstract class FactoryBeanRegistrySupport extends DefaultSingletonBeanReg
 	}
 
 	/**
+	 * 从BeanFactory中获取 getObject， bean的实例
 	 * Obtain an object to expose from the given FactoryBean.
 	 * @param factory the FactoryBean instance
 	 * @param beanName the name of the bean
